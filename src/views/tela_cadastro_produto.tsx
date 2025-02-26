@@ -1,14 +1,58 @@
 import React from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+interface Produto{
+    nome: string;
+    descricao: string;
+    valor: string;
+}
 
 const Tela_cadastro_produto: React.FC = () => {
+    const{
+        control,
+        handlerSubmit,
+        formState: {errors},
+        reset
+    } = useForm<Produto>();
+
+    const enviar = async (dados: Produto)=>{
+        try{
+            const produto_existe = await AsyncStorage.getItem("produtos");
+            const produtos = produto_existe ? JSON.parse(produto_existe): [];
+            const novo_produto = {...dados, id: (Math.random()*100) };
+            produtos.push(novo_produto);
+
+            await AsyncStorage.setItem("produtos", JSON.stringify(produtos));
+            console.log("Dados salvos com sucesso!");
+            reset()
+        }
+        catch(error){
+            console.log("Erro ao salvar: " + error);
+        }
+        
+    }
+
     return(
         <View style={styles.container}>
+            
             <Text style ={styles.label}>Nome do produto:</Text>
-            <TextInput
-                style = {styles.input}
-                placeholder="Digite o nome do produto"
+            <Controller
+                control={control}
+                name="nome"
+                rules={{required:"Nome deve ser obrigatório"}}
+                render={({ field: {onChange, value}})} => {
+                    <TextInput
+                        style = {styles.input}
+                        placeholder="Digite o nome do produto"
+                        onChangeText={OnChange}
+                        value={value}
+                    />
+                }
             />
+            
+            
             <Text style ={styles.label}>Descrição do produto:</Text>
             <TextInput
                 style = {styles.input}
@@ -20,6 +64,7 @@ const Tela_cadastro_produto: React.FC = () => {
                 placeholder="Digite o valor unitário"
                 keyboardType="numeric"
             />
+            
             <Button title="Salvar"/>
         </View>
     );
