@@ -12,7 +12,7 @@ interface Produto{
 const Tela_cadastro_produto: React.FC = () => {
     const{
         control,
-        handlerSubmit,
+        handleSubmit,
         formState: {errors},
         reset
     } = useForm<Produto>();
@@ -20,8 +20,12 @@ const Tela_cadastro_produto: React.FC = () => {
     const enviar = async (dados: Produto)=>{
         try{
             const produto_existe = await AsyncStorage.getItem("produtos");
-            const produtos = produto_existe ? JSON.parse(produto_existe): [];
-            const novo_produto = {...dados, id: (Math.random()*100) };
+            let produtos = [];
+            if(produto_existe){
+                produtos = JSON.parse(produto_existe);
+            }
+            
+            const novo_produto = {...dados, id: Date.now() };
             produtos.push(novo_produto);
 
             await AsyncStorage.setItem("produtos", JSON.stringify(produtos));
@@ -42,30 +46,50 @@ const Tela_cadastro_produto: React.FC = () => {
                 control={control}
                 name="nome"
                 rules={{required:"Nome deve ser obrigatório"}}
-                render={({ field: {onChange, value}})} => {
+                render={({ field: {onChange, value} }) => (
                     <TextInput
                         style = {styles.input}
                         placeholder="Digite o nome do produto"
-                        onChangeText={OnChange}
+                        onChangeText={onChange}
                         value={value}
                     />
-                }
+                )}
             />
             
             
             <Text style ={styles.label}>Descrição do produto:</Text>
-            <TextInput
-                style = {styles.input}
-                placeholder="Digite a descrição do produto"
+            <Controller
+                control={control}
+                name="descricao"
+                rules={{required:"Descrição deve ser obrigatória"}}
+                render={({ field: {onChange, value} }) => (
+                    <TextInput
+                        style = {styles.input}
+                        placeholder="Digite a descrição do produto"
+                        onChangeText={onChange}
+                        value={value}
+                    />
+                )}
             />
+
             <Text style = {styles.label}>Valor unitário:</Text>
-            <TextInput
-                style = {styles.input}
-                placeholder="Digite o valor unitário"
-                keyboardType="numeric"
+            <Controller
+                control={control}
+                name="valor"
+                rules={{required:"Valor deve ser obrigatório"}}
+                render={({ field: {onChange, value} }) => (
+                    <TextInput
+                        style = {styles.input}
+                        placeholder="Digite o valor do produto"
+                        keyboardType="numeric"
+                        onChangeText={onChange}
+                        value={value}
+                    />
+                )}
             />
             
-            <Button title="Salvar"/>
+            
+            <Button title="Salvar" onPress={handleSubmit(enviar)} />
         </View>
     );
 }
