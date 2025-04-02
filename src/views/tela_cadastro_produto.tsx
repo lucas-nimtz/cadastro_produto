@@ -24,7 +24,7 @@ const Tela_cadastro_produto: React.FC = () => {
             if(produto_existe){
                 produtos = JSON.parse(produto_existe);
             }
-            
+
             const novo_produto = {...dados, id: Date.now() };
             produtos.push(novo_produto);
 
@@ -55,7 +55,7 @@ const Tela_cadastro_produto: React.FC = () => {
                     />
                 )}
             />
-            
+            {errors.nome && <Text>{errors.nome.message}</Text>}
             
             <Text style ={styles.label}>Descrição do produto:</Text>
             <Controller
@@ -71,6 +71,7 @@ const Tela_cadastro_produto: React.FC = () => {
                     />
                 )}
             />
+            {errors.descricao && <Text>{errors.descricao.message}</Text>}
 
             <Text style = {styles.label}>Valor unitário:</Text>
             <Controller
@@ -87,7 +88,7 @@ const Tela_cadastro_produto: React.FC = () => {
                     />
                 )}
             />
-            
+            {errors.valor && <Text>{errors.valor.message}</Text>}
             
             <Button title="Salvar" onPress={handleSubmit(enviar)} />
         </View>
