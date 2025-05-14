@@ -21,6 +21,10 @@ const TelaListarProdutos: React.FC = () => {
         navegacao.navigate("Cadastro");
     }
 
+    const editar = () => {
+        navegacao.navigate("Editar");
+    }
+
     useEffect(() => {
         const busca_produtos = async () => {
             try{
@@ -33,7 +37,7 @@ const TelaListarProdutos: React.FC = () => {
             }
         }
         busca_produtos();
-    });
+    }, []);
 
     return(
         <View style={styles.container}>
@@ -47,6 +51,7 @@ const TelaListarProdutos: React.FC = () => {
                         <Text style={styles.nome}>{item.nome}</Text>
                         <Text>{item.descricao}</Text>
                         <Text style={styles.valor}>R$ {item.valor}</Text>
+                        <Button title='Editar' onPress={ () => {editar()} } />
                     </View>
                 )}
             />
@@ -77,7 +82,7 @@ const styles = StyleSheet.create({
     valor: {
         fontSize: 14,
         color: 'green',
-    }
+    },
 })
 
 export default TelaListarProdutos;
