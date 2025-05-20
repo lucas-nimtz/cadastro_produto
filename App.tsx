@@ -9,7 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 export type RootStackParamList = {
   Cadastro: undefined;
   Listagem: undefined;
-  Editar: undefined;
+  Editar: { id: string };
 }
 
 const Stack = createStackNavigator<RootStackParamList>();

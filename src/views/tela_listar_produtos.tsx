@@ -21,8 +21,8 @@ const TelaListarProdutos: React.FC = () => {
         navegacao.navigate("Cadastro");
     }
 
-    const editar = () => {
-        navegacao.navigate("Editar");
+    const editar = (id: string) => {
+        navegacao.navigate("Editar", { id });
     }
 
     useEffect(() => {
@@ -46,14 +46,20 @@ const TelaListarProdutos: React.FC = () => {
             <FlatList
                 data={produtos}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) =>(
-                    <View style={styles.itemContainer}>
-                        <Text style={styles.nome}>{item.nome}</Text>
-                        <Text>{item.descricao}</Text>
-                        <Text style={styles.valor}>R$ {item.valor}</Text>
-                        <Button title='Editar' onPress={ () => {editar()} } />
+                renderItem={({ item }) => (
+                <View style={styles.itemContainer}>
+                    <View style={styles.infoContainer}>
+                        <View>
+                            <Text style={styles.nome}>{item.nome}</Text>
+                            <Text>{item.descricao}</Text>
+                            <Text style={styles.valor}>R$ {item.valor}</Text>
+                        </View>
+                        <View style={styles.botaoEditarContainer}>
+                            <Button title="Editar" onPress={() => editar(item.id)} />
+                        </View>
                     </View>
-                )}
+                </View>
+            )}
             />
         </View>
     );
@@ -82,6 +88,15 @@ const styles = StyleSheet.create({
     valor: {
         fontSize: 14,
         color: 'green',
+    },
+    infoContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    botaoEditarContainer: {
+        marginLeft: 10,
+        width: 80,
     },
 })
 
