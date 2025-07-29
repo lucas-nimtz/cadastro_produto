@@ -1,15 +1,17 @@
 import React from 'react';
-import Tela_cadastro_produto from './src/views/tela_cadastro_produto';
-import TelaListarProdutos from './src/views/tela_listar_produtos';
-import TelaEditarProdutos from './src/views/tela_editar_produto';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 
+import Tela_cadastro_produto from './src/views/tela_cadastro_produto';
+import Tela_Listar_Produtos from './src/views/tela_listar_produtos';
+import Tela_Home from './src/views/tela_home';
+import Tela_Cadastro_Cliente from './src/views/tela_cadastro_cliente';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
 
 export type RootStackParamList = {
   Cadastro: undefined;
   Listagem: undefined;
-  Editar: { id: string };
+  Home: undefined;
+  CadastroClientes: undefined;
 }
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -17,21 +19,25 @@ const Stack = createStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName='Listagem'
-        screenOptions={{headerShown: false}}
+      <Stack.Navigator
+        initialRouteName='Home'
+        screenOptions={{ headerShown: false }}
       >
-      <Stack.Screen
+        <Stack.Screen
+          name='Home'
+          component={Tela_Home}
+        />
+        <Stack.Screen
+          name='CadastroClientes'
+          component={Tela_Cadastro_Cliente}
+        />
+        <Stack.Screen
           name='Cadastro'
           component={Tela_cadastro_produto}
         />
         <Stack.Screen
           name='Listagem'
-          component={TelaListarProdutos}
-        />
-        <Stack.Screen
-          name='Editar'
-          component={TelaEditarProdutos}
+          component={Tela_Listar_Produtos}
         />
       </Stack.Navigator>
     </NavigationContainer>
