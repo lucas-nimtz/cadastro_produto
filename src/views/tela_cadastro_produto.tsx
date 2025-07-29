@@ -14,6 +14,7 @@ interface Produto {
     nome: string;
     descricao: string;
     valor: string;
+    quantidade: string;
 }
 
 const Tela_cadastro_produto: React.FC = () => {
@@ -25,23 +26,67 @@ const Tela_cadastro_produto: React.FC = () => {
         reset
     } = useForm<Produto>();
 
-    const enviar = async (dados: Produto) => {
-        try {
-            const produto_existe = await AsyncStorage.getItem("produtos");
-            let produtos = [];
-            if (produto_existe) {
-                produtos = JSON.parse(produto_existe);
+    // const enviar = async (dados: Produto) => {
+    //     try {
+    //         const produto_existe = await AsyncStorage.getItem("produtos");
+    //         let produtos = [];
+    //         if (produto_existe) {
+    //             produtos = JSON.parse(produto_existe);
+    //         }
+
+    //         const novo_produto = { ...dados, id: Date.now() };
+    //         produtos.push(novo_produto);
+
+    //         await AsyncStorage.setItem("produtos", JSON.stringify(produtos));
+    //         console.log("Dados salvos com sucesso!");
+
+    //         Alert.alert(
+    //             "Sucesso!",
+    //             "Produto cadastrado com sucesso!",
+    //             [
+    //                 {
+    //                     text: "OK",
+    //                     onPress: () => {
+    //                         reset();
+    //                         navegacao.navigate("Listagem");
+    //                     }
+    //                 }
+    //             ]
+    //         );
+    //     }
+    //     catch (error) {
+    //         console.log("Erro ao salvar: " + error);
+    //         Alert.alert("Erro", "Ocorreu um erro ao salvar o produto.");
+    //     }
+    // }
+
+    const enviar = async (dados: Produto) => (
+        try{
+            const corpo = {
+                nome: dados.nome,
+                descricao: dados.descricao,
+                valor: parseFloat(dados.valor), // texto para decimal
+                quantidade: parseInt(dados.quantidade), // texto para inteiro
+                data_cadastro: new Date().toISOString().split("T")[0] // gera data em YYYY/MM/DD
             }
 
-            const novo_produto = { ...dados, id: Date.now() };
-            produtos.push(novo_produto);
+            const resposta = await fetch("http://191.252.103.125/api/produtos",
+                {
+                    method: "POST",
+                    headers:{
+                        "Content-Type":"application/json",
+                    },
+                    body: JSON.stringify(corpo)
+                }
+            )
 
-            await AsyncStorage.setItem("produtos", JSON.stringify(produtos));
-            console.log("Dados salvos com sucesso!");
+            if (!resposta.ok) {
+                throw new Error("Erro na resposta da API")
+            }
 
             Alert.alert(
                 "Sucesso!",
-                "Produto cadastrado com sucesso!",
+                "Produto cadastrado com sucesso.",
                 [
                     {
                         text: "OK",
@@ -51,13 +96,12 @@ const Tela_cadastro_produto: React.FC = () => {
                         }
                     }
                 ]
-            );
+            )
+
+        } catch (error) {
+
         }
-        catch (error) {
-            console.log("Erro ao salvar: " + error);
-            Alert.alert("Erro", "Ocorreu um erro ao salvar o produto.");
-        }
-    }
+    )
 
     const voltar = () => {
         navegacao.goBack();
