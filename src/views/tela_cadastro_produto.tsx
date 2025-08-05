@@ -60,7 +60,7 @@ const Tela_cadastro_produto: React.FC = () => {
     //     }
     // }
 
-    const enviar = async (dados: Produto) => (
+    const enviar = async (dados: Produto) => {
         try{
             const corpo = {
                 nome: dados.nome,
@@ -70,7 +70,7 @@ const Tela_cadastro_produto: React.FC = () => {
                 data_cadastro: new Date().toISOString().split("T")[0] // gera data em YYYY/MM/DD
             }
 
-            const resposta = await fetch("http://191.252.103.125/api/produtos",
+            const resposta = await fetch("https://acmitech.com.br/api/produtos",
                 {
                     method: "POST",
                     headers:{
@@ -96,12 +96,20 @@ const Tela_cadastro_produto: React.FC = () => {
                         }
                     }
                 ]
-            )
+            );
 
         } catch (error) {
-
+            Alert.alert(
+                "Erro",
+                "Falha ao cadastrar produto." + error,
+                [
+                    {
+                        text: "OK"
+                    }
+                ]
+            );
         }
-    )
+    };
 
     const voltar = () => {
         navegacao.goBack();
@@ -211,6 +219,34 @@ const Tela_cadastro_produto: React.FC = () => {
                         {errors.valor && (
                             <Text style={styles.erroTexto}>
                                 <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.valor.message}
+                            </Text>
+                        )}
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>
+                            <Feather name="hash" size={16} color="#5b9bd5" /> Quantidade
+                        </Text>
+                        <Controller
+                            control={control}
+                            name="quantidade"
+                            rules={{ required: "Quantidade deve ser obrigatória" }}
+                            render={({ field: { onChange, value } }) => (
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        style={[styles.input, errors.quantidade && styles.inputError]}
+                                        placeholder="0"
+                                        placeholderTextColor="#a0a0a0"
+                                        keyboardType="numeric"
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                        />
+                        {errors.quantidade && (
+                            <Text style={styles.erroTexto}>
+                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.quantidade.message}
                             </Text>
                         )}
                     </View>

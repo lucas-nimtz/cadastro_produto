@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { RootStackParamList } from '../../App';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,7 +35,7 @@ const TelaListarProdutos: React.FC = () => {
         //     console.log("Erro ao buscar lista", error);
         // }
         try{
-            const resposta = await fetch('http://191.252.103.125/api/produtos')
+            const resposta = await fetch('https://acmitech.com.br/api/produtos')
             if(!resposta.ok){
                 throw new Error("Erro ao buscar os produtos da API.")
             }
@@ -43,7 +43,15 @@ const TelaListarProdutos: React.FC = () => {
             const dados = await resposta.json();
             setProdutos(dados);
         } catch (error){
-            console.log("Erro: ", error);
+            Alert.alert(
+                "Erro",
+                "Falha ao atualizar produto." + error,
+                [
+                    {
+                        text: "OK"
+                    }
+                ]
+            );
         }
 
     };
@@ -75,34 +83,64 @@ const TelaListarProdutos: React.FC = () => {
         //     console.log("Erro ao salvar edição:", error);
         // }
         try{
-            const resposta = await fetch(`http://191.252.103.125/api/produtos/api/produtos/${produtoSelecionado.id}`,
+            const resposta = await fetch(`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
                 {
-                    method: 'PACTH',
+                    method: 'PATCH',
                     headers:{
                         'Content-type': 'aplication/json'
                     },
                     body: JSON.stringify(produtoSelecionado)
                 }
             );
-        } catch(error){
-            console.log("Erro: ", error)
+            if(!resposta.ok){
+                throw new Error("Erro ao editar produto.");
+            }
+            busca_produtos();
+            setModalVisible(false);
+
+        } catch (error) {
+            Alert.alert(
+                "Erro",
+                "Falha ao atualizar produto." + error,
+                [
+                    {
+                        text: "OK"
+                    }
+                ]
+            );
         }
     };
 
     const excluirProduto = async () => {
         if (!produtoSelecionado) return;
 
+        // try {
+        //     const listaAtual = await AsyncStorage.getItem('produtos');
+        //     let produtos = listaAtual ? JSON.parse(listaAtual) : [];
+
+        //     const atualizados = produtos.filter((p: Produto) => p.id !== produtoSelecionado.id);
+
+        //     await AsyncStorage.setItem('produtos', JSON.stringify(atualizados));
+        //     setProdutos(atualizados);
+        //     setModalVisible(false);
+        // } catch (error) {
+        //     console.log("Erro ao excluir produto:", error);
+        // }
+
         try {
-            const listaAtual = await AsyncStorage.getItem('produtos');
-            let produtos = listaAtual ? JSON.parse(listaAtual) : [];
-
-            const atualizados = produtos.filter((p: Produto) => p.id !== produtoSelecionado.id);
-
-            await AsyncStorage.setItem('produtos', JSON.stringify(atualizados));
-            setProdutos(atualizados);
+            const resposta = await fetch (`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
+                {
+                    method: 'DELETE'
+                }
+            );
+            
+            if(!resposta.ok){
+                throw new Error("Falha ao excluir produto.")
+            }
+            busca_produtos();
             setModalVisible(false);
         } catch (error) {
-            console.log("Erro ao excluir produto:", error);
+            
         }
     };
 
