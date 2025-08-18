@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
@@ -11,146 +10,78 @@ type prop_navegacao = StackNavigationProp<RootStackParamList, "Listagem">;
 
 interface Cliente {
     id: string;
-    nome: string;
-    descricao: string;
-    valor: string;
+    nome_completo: string;
+    email: string;
+    senha: string;
+    cpf: string;
+    endereco: string;
+    telefone: string;
 }
 
 const TelaListarClientes: React.FC = () => {
     const navegacao = useNavigation<prop_navegacao>();
-    const [produtos, setProdutos] = useState<Produto[]>([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
+    const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
 
-    const cadastro = () => navegacao.navigate("Cadastro");
+    const cadastro = () => navegacao.navigate("CadastroClientes");
     const voltar = () => { navegacao.goBack(); }
 
-    const busca_produtos = async () => {
-        // try {
-        //     const lista_produtos = await AsyncStorage.getItem('produtos');
-        //     if (lista_produtos) {
-        //         setProdutos(JSON.parse(lista_produtos));
-        //     }
-        // } catch (error) {
-        //     console.log("Erro ao buscar lista", error);
-        // }
-        try{
-            const resposta = await fetch('https://acmitech.com.br/api/produtos')
-            if(!resposta.ok){
-                throw new Error("Erro ao buscar os produtos da API.")
+    const busca_clientes = async () => {
+        try {
+            const resposta = await fetch('https://acmitech.com.br/api/clientes');
+            if (!resposta.ok) {
+                throw new Error("Erro ao buscar os clientes da API.");
             }
-            
             const dados = await resposta.json();
-            setProdutos(dados);
-        } catch (error){
-            Alert.alert(
-                "Erro",
-                "Falha ao atualizar produto." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
-            );
+            setClientes(dados);
+        } catch (error) {
+            Alert.alert("Erro", "Falha ao buscar clientes. " + error);
         }
-
     };
 
     useEffect(() => {
-        busca_produtos();
+        busca_clientes();
     }, []);
 
-    const abrirModalEdicao = (produto: Produto) => {
-        setProdutoSelecionado(produto);
+    const abrirModalEdicao = (cliente: Cliente) => {
+        setClienteSelecionado(cliente);
         setModalVisible(true);
     };
 
     const salvarEdicao = async () => {
-        if (!produtoSelecionado) return;
-
-        // try {
-        //     const listaAtual = await AsyncStorage.getItem('produtos');
-        //     let produtos = listaAtual ? JSON.parse(listaAtual) : [];
-
-        //     const atualizados = produtos.map((p: Produto) =>
-        //         p.id === produtoSelecionado.id ? produtoSelecionado : p
-        //     );
-
-        //     await AsyncStorage.setItem('produtos', JSON.stringify(atualizados));
-        //     setProdutos(atualizados);
-        //     setModalVisible(false);
-        // } catch (error) {
-        //     console.log("Erro ao salvar edição:", error);
-        // }
-        try{
-            const resposta = await fetch(`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
-                {
-                    method: 'PATCH',
-                    headers:{
-                        'Content-type': 'aplication/json'
-                    },
-                    body: JSON.stringify(produtoSelecionado)
-                }
-            );
-            if(!resposta.ok){
-                throw new Error("Erro ao editar produto.");
-            }
-            busca_produtos();
+        if (!clienteSelecionado) return;
+        try {
+            const resposta = await fetch(`https://acmitech.com.br/api/clientes/${clienteSelecionado.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(clienteSelecionado),
+            });
+            if (!resposta.ok) throw new Error("Erro ao editar cliente.");
+            busca_clientes();
             setModalVisible(false);
-
         } catch (error) {
-            Alert.alert(
-                "Erro",
-                "Falha ao atualizar produto." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
-            );
+            Alert.alert("Erro", "Falha ao atualizar cliente. " + error);
         }
     };
 
-    const excluirProduto = async () => {
-        if (!produtoSelecionado) return;
-
-        // try {
-        //     const listaAtual = await AsyncStorage.getItem('produtos');
-        //     let produtos = listaAtual ? JSON.parse(listaAtual) : [];
-
-        //     const atualizados = produtos.filter((p: Produto) => p.id !== produtoSelecionado.id);
-
-        //     await AsyncStorage.setItem('produtos', JSON.stringify(atualizados));
-        //     setProdutos(atualizados);
-        //     setModalVisible(false);
-        // } catch (error) {
-        //     console.log("Erro ao excluir produto:", error);
-        // }
-
+    const excluirCliente = async () => {
+        if (!clienteSelecionado) return;
         try {
-            const resposta = await fetch (`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
-                {
-                    method: 'DELETE'
-                }
-            );
-            
-            if(!resposta.ok){
-                throw new Error("Falha ao excluir produto.")
-            }
-            busca_produtos();
+            const resposta = await fetch(`https://acmitech.com.br/api/clientes/${clienteSelecionado.id}`, {
+                method: 'DELETE',
+            });
+            if (!resposta.ok) throw new Error("Falha ao excluir cliente.");
+            busca_clientes();
             setModalVisible(false);
         } catch (error) {
-            
+            Alert.alert("Erro", "Falha ao excluir cliente. " + error);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
-
-            <LinearGradient
-                colors={['#f5f9fc', '#bbd7f5']}
-                style={styles.background}
-            />
+            <LinearGradient colors={['#f5f9fc', '#bbd7f5']} style={styles.background} />
 
             <View style={styles.header}>
                 <TouchableOpacity style={styles.voltarBotao} onPress={voltar}>
@@ -158,10 +89,10 @@ const TelaListarClientes: React.FC = () => {
                 </TouchableOpacity>
                 <View style={styles.cabecalhoTitulo}>
                     <View style={styles.iconeContainer}>
-                        <Feather name="package" size={32} color="#5b9bd5" />
+                        <Feather name="users" size={32} color="#5b9bd5" />
                     </View>
-                    <Text style={styles.titulo}>Lista de Produtos</Text>
-                    <Text style={styles.subTitulo}>Veja todos os produto do catálogo</Text>
+                    <Text style={styles.titulo}>Lista de Clientes</Text>
+                    <Text style={styles.subTitulo}>Veja todos os clientes cadastrados</Text>
                 </View>
             </View>
 
@@ -174,19 +105,19 @@ const TelaListarClientes: React.FC = () => {
                         end={{ x: 1, y: 1 }}
                     >
                         <Feather name="plus" size={20} color="#ffffff" />
-                        <Text style={styles.botaoCadastroTexto}>Novo Produto</Text>
+                        <Text style={styles.botaoCadastroTexto}>Novo Cliente</Text>
                     </LinearGradient>
                 </TouchableOpacity>
 
-                {produtos.length === 0 ? (
+                {clientes.length === 0 ? (
                     <View style={styles.listaVazia}>
-                        <Feather name="package" size={64} color="#a7c9e8" />
-                        <Text style={styles.listaVaziaTitulo}>Nenhum produto cadastrado</Text>
-                        <Text style={styles.listaVaziaSubTitulo}>Adicione seu primeiro produto!</Text>
+                        <Feather name="users" size={64} color="#a7c9e8" />
+                        <Text style={styles.listaVaziaTitulo}>Nenhum cliente cadastrado</Text>
+                        <Text style={styles.listaVaziaSubTitulo}>Cadastre seu primeiro cliente!</Text>
                     </View>
                 ) : (
                     <FlatList
-                        data={produtos}
+                        data={clientes}
                         keyExtractor={(item) => item.id.toString()}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.listaConteudo}
@@ -198,10 +129,11 @@ const TelaListarClientes: React.FC = () => {
                             >
                                 <View style={styles.itemConteudo}>
                                     <View style={styles.itemCabecalho}>
-                                        <Text style={styles.nome}>{item.nome}</Text>
-                                        <Text style={styles.valor}>R$ {item.valor}</Text>
+                                        <Text style={styles.nome}>{item.nome_completo}</Text>
+                                        <Text style={styles.valor}>{item.cpf}</Text>
                                     </View>
-                                    <Text style={styles.descricao}>{item.descricao}</Text>
+                                    <Text style={styles.descricao}>{item.email}</Text>
+                                    <Text style={styles.descricao}>{item.telefone}</Text>
                                     <View style={styles.itemEditar}>
                                         <Feather name="edit-2" size={16} color="#7a91a7" />
                                     </View>
@@ -216,67 +148,66 @@ const TelaListarClientes: React.FC = () => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalConteudo}>
                         <View style={styles.modalCabecalho}>
-                            <Text style={styles.modalTitulo}>Editar Produto</Text>
+                            <Text style={styles.modalTitulo}>Editar Cliente</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Feather name="x" size={24} color="#476c8e" />
                             </TouchableOpacity>
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Nome</Text>
+                            <Text style={styles.label}>Nome Completo</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Nome do produto"
-                                value={produtoSelecionado?.nome}
+                                value={clienteSelecionado?.nome_completo}
                                 onChangeText={(text) =>
-                                    setProdutoSelecionado({ ...produtoSelecionado!, nome: text })
+                                    setClienteSelecionado({ ...clienteSelecionado!, nome_completo: text })
                                 }
                             />
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Descrição</Text>
+                            <Text style={styles.label}>E-mail</Text>
                             <TextInput
-                                style={[styles.input, styles.textArea]}
-                                placeholder="Descrição do produto"
-                                multiline
-                                numberOfLines={3}
-                                value={produtoSelecionado?.descricao}
+                                style={styles.input}
+                                value={clienteSelecionado?.email}
                                 onChangeText={(text) =>
-                                    setProdutoSelecionado({ ...produtoSelecionado!, descricao: text })
+                                    setClienteSelecionado({ ...clienteSelecionado!, email: text })
                                 }
                             />
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Valor</Text>
+                            <Text style={styles.label}>CPF</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="0,00"
-                                keyboardType="numeric"
-                                value={produtoSelecionado?.valor}
+                                value={clienteSelecionado?.cpf}
                                 onChangeText={(text) =>
-                                    setProdutoSelecionado({ ...produtoSelecionado!, valor: text })
+                                    setClienteSelecionado({ ...clienteSelecionado!, cpf: text })
+                                }
+                            />
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Telefone</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={clienteSelecionado?.telefone}
+                                onChangeText={(text) =>
+                                    setClienteSelecionado({ ...clienteSelecionado!, telefone: text })
                                 }
                             />
                         </View>
 
                         <View style={styles.modalBotoes}>
                             <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
-                                <LinearGradient
-                                    colors={['#90d4aa', '#6db58a']}
-                                    style={styles.botaoGradiente}
-                                >
+                                <LinearGradient colors={['#90d4aa', '#6db58a']} style={styles.botaoGradiente}>
                                     <Feather name="check" size={18} color="#ffffff" />
                                     <Text style={styles.botaoTexto}>Salvar</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.botaoExcluir} onPress={excluirProduto}>
-                                <LinearGradient
-                                    colors={['#ff7b7b', '#e85656']}
-                                    style={styles.botaoGradiente}
-                                >
+                            <TouchableOpacity style={styles.botaoExcluir} onPress={excluirCliente}>
+                                <LinearGradient colors={['#ff7b7b', '#e85656']} style={styles.botaoGradiente}>
                                     <Feather name="trash-2" size={18} color="#ffffff" />
                                     <Text style={styles.botaoTexto}>Excluir</Text>
                                 </LinearGradient>

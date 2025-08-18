@@ -4,6 +4,7 @@ import Tela_cadastro_produto from './src/views/tela_cadastro_produto';
 import Tela_Listar_Produtos from './src/views/tela_listar_produtos';
 import Tela_Home from './src/views/tela_home';
 import Tela_Cadastro_Cliente from './src/views/tela_cadastro_cliente';
+import TelaListarClientes from './src/views/tela_listar_clientes';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -39,6 +40,11 @@ export default function App() {
           name='Listagem'
           component={Tela_Listar_Produtos}
         />
+        <Stack.Screen
+          name='ListagemClientes'
+          component={TelaListarClientes}
+        />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
