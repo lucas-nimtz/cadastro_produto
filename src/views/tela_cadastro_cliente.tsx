@@ -62,7 +62,7 @@ const TelaCadastroCliente: React.FC = () => {
                         text: "OK",
                         onPress: () => {
                             reset();
-                            navegacao.navigate("Listagem");
+                            navegacao.navigate("ListagemClientes");
                         }
                     }
                 ]
