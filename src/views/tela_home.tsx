@@ -46,22 +46,6 @@ const Tela_Home: React.FC = () => {
                 </TouchableOpacity>
                 
                 <TouchableOpacity
-                    style={[styles.botao, styles.listagemBotao]}
-                    onPress={() => { navegacao.navigate('ListagemClientes'); }}
-                    activeOpacity={0.8}
-                >
-                    <LinearGradient
-                        colors={['#bba7e8ff', '#7c7bd0ff']}
-                        style={styles.botaoGradiente}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <Feather name="users" size={24} color="#ffffff" />
-                        <Text style={styles.botaoTexto}>Ver Clientes</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
                     style={[styles.botao, styles.cadastroBotao]}
                     onPress={() => { navegacao.navigate('Cadastro'); }}
                     activeOpacity={0.8}
@@ -90,6 +74,22 @@ const Tela_Home: React.FC = () => {
                     >
                         <Feather name="user-plus" size={24} color="#ffffff" />
                         <Text style={styles.botaoTexto}>Cadastrar Cliente</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.botao, styles.listagemBotao]}
+                    onPress={() => { navegacao.navigate('ListagemClientes'); }}
+                    activeOpacity={0.8}
+                >
+                    <LinearGradient
+                        colors={['#bba7e8ff', '#7c7bd0ff']}
+                        style={styles.botaoGradiente}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        <Feather name="users" size={24} color="#ffffff" />
+                        <Text style={styles.botaoTexto}>Ver Clientes</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>

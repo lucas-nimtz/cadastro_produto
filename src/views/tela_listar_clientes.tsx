@@ -130,10 +130,9 @@ const TelaListarClientes: React.FC = () => {
                                 <View style={styles.itemConteudo}>
                                     <View style={styles.itemCabecalho}>
                                         <Text style={styles.nome}>{item.nome_completo}</Text>
-                                        <Text style={styles.valor}>{item.cpf}</Text>
                                     </View>
                                     <Text style={styles.descricao}>{item.email}</Text>
-                                    <Text style={styles.descricao}>{item.telefone}</Text>
+                                    <Text style={styles.descricao}>{item.endereco}</Text>
                                     <View style={styles.itemEditar}>
                                         <Feather name="edit-2" size={16} color="#7a91a7" />
                                     </View>

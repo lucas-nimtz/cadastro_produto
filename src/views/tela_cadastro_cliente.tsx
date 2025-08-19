@@ -110,7 +110,7 @@ const TelaCadastroCliente: React.FC = () => {
                 <View style={styles.formularioContainer}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>
-                            <Feather name="file-text" size={16} color="#5b9bd5" /> Nome completo do cliente
+                            <Feather name="user" size={16} color="#5b9bd5" /> Nome completo do cliente
                         </Text>
                         <Controller
                             control={control}
