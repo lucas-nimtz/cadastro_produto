@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { RootStackParamList } from '../../App';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,26 +34,15 @@ const TelaListarProdutos: React.FC = () => {
         // } catch (error) {
         //     console.log("Erro ao buscar lista", error);
         // }
-        try{
-            const resposta = await fetch('https://acmitech.com.br/api/produtos')
-            if(!resposta.ok){
-                throw new Error("Erro ao buscar os produtos da API.")
-            }
-            
-            const dados = await resposta.json();
-            setProdutos(dados);
-        } catch (error){
-            Alert.alert(
-                "Erro",
-                "Falha ao atualizar produto." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
-            );
-        }
+        try {
+            const response = await fetch('https://acmitech.com.br/api/produtos');
+            if (!response.ok) throw new Error("Erro ao buscar produtos da API");
 
+            const data = await response.json();
+            setProdutos(data);
+        } catch (error) {
+            console.log("Erro ao buscar produtos da API:", error);
+        }
     };
 
     useEffect(() => {
@@ -66,7 +55,7 @@ const TelaListarProdutos: React.FC = () => {
     };
 
     const salvarEdicao = async () => {
-        if (!produtoSelecionado) return;
+        // if (!produtoSelecionado) return;
 
         // try {
         //     const listaAtual = await AsyncStorage.getItem('produtos');
@@ -82,37 +71,32 @@ const TelaListarProdutos: React.FC = () => {
         // } catch (error) {
         //     console.log("Erro ao salvar edição:", error);
         // }
-        try{
-            const resposta = await fetch(`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
-                {
-                    method: 'PATCH',
-                    headers:{
-                        'Content-type': 'aplication/json'
-                    },
-                    body: JSON.stringify(produtoSelecionado)
-                }
-            );
-            if(!resposta.ok){
-                throw new Error("Erro ao editar produto.");
-            }
-            busca_produtos();
-            setModalVisible(false);
+        if (!produtoSelecionado) return;
 
-        } catch (error) {
-            Alert.alert(
-                "Erro",
-                "Falha ao atualizar produto." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
+        try {
+            const response = await fetch(`https://acmitech.com.br/api/produtos/${produtoSelecionado.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(produtoSelecionado),
+            });
+
+            if (!response.ok) throw new Error("Erro ao salvar edição do produto");
+
+            // Atualiza localmente após salvar
+            const produtosAtualizados = produtos.map((p) =>
+                p.id === produtoSelecionado.id ? produtoSelecionado : p
             );
+            setProdutos(produtosAtualizados);
+            setModalVisible(false);
+        } catch (error) {
+            console.log("Erro ao salvar edição na API:", error);
         }
     };
 
-    const excluirProduto = async () => {
-        if (!produtoSelecionado) return;
+    const excluirProduto = async (id: string) => {
+        // if (!produtoSelecionado) return;
 
         // try {
         //     const listaAtual = await AsyncStorage.getItem('produtos');
@@ -126,21 +110,19 @@ const TelaListarProdutos: React.FC = () => {
         // } catch (error) {
         //     console.log("Erro ao excluir produto:", error);
         // }
-
         try {
-            const resposta = await fetch (`https://acmitech.com.br/api/produtos/api/produtos/${produtoSelecionado.id}`,
-                {
-                    method: 'DELETE'
-                }
-            );
-            
-            if(!resposta.ok){
-                throw new Error("Falha ao excluir produto.")
-            }
-            busca_produtos();
+            const response = await fetch(`https://acmitech.com.br/api/produtos/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error("Erro ao excluir produto na API");
+
+            // Atualiza a lista local após exclusão
+            const produtosAtualizados = produtos.filter((produto) => produto.id !== id);
+            setProdutos(produtosAtualizados);
             setModalVisible(false);
         } catch (error) {
-            
+            console.log("Erro ao excluir produto na API:", error);
         }
     };
 
@@ -272,7 +254,7 @@ const TelaListarProdutos: React.FC = () => {
                                 </LinearGradient>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.botaoExcluir} onPress={excluirProduto}>
+                            <TouchableOpacity style={styles.botaoExcluir} onPress={() => excluirProduto(produtoSelecionado.id)}>
                                 <LinearGradient
                                     colors={['#ff7b7b', '#e85656']}
                                     style={styles.botaoGradiente}

@@ -1,16 +1,17 @@
 import React from 'react';
 
-import Tela_cadastro_produto from './src/views/tela_cadastro_produto';
+import Tela_Cadastro_Produto from './src/views/tela_cadastro_produto';
 import Tela_Listar_Produtos from './src/views/tela_listar_produtos';
+import Tela_Listar_Clientes from './src/views/tela_listar_clientes';
 import Tela_Home from './src/views/tela_home';
 import Tela_Cadastro_Cliente from './src/views/tela_cadastro_cliente';
-import TelaListarClientes from './src/views/tela_listar_clientes';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 
 export type RootStackParamList = {
   Cadastro: undefined;
   Listagem: undefined;
+  ListagemClientes: undefined;
   Home: undefined;
   CadastroClientes: undefined;
 }
@@ -34,7 +35,7 @@ export default function App() {
         />
         <Stack.Screen
           name='Cadastro'
-          component={Tela_cadastro_produto}
+          component={Tela_Cadastro_Produto}
         />
         <Stack.Screen
           name='Listagem'
@@ -42,9 +43,8 @@ export default function App() {
         />
         <Stack.Screen
           name='ListagemClientes'
-          component={TelaListarClientes}
+          component={Tela_Listar_Clientes}
         />
-        
       </Stack.Navigator>
     </NavigationContainer>
   );

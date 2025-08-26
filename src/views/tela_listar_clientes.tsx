@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 
-type prop_navegacao = StackNavigationProp<RootStackParamList, "Listagem">;
+type prop_navegacao = StackNavigationProp<RootStackParamList, "ListagemClientes">;
 
 interface Cliente {
     id: string;
@@ -14,8 +14,8 @@ interface Cliente {
     email: string;
     senha: string;
     cpf: string;
-    endereco: string;
     telefone: string;
+    endereco: string;
 }
 
 const TelaListarClientes: React.FC = () => {
@@ -30,9 +30,7 @@ const TelaListarClientes: React.FC = () => {
     const busca_clientes = async () => {
         try {
             const resposta = await fetch('https://acmitech.com.br/api/clientes');
-            if (!resposta.ok) {
-                throw new Error("Erro ao buscar os clientes da API.");
-            }
+            if (!resposta.ok) throw new Error("Erro ao buscar clientes da API");
             const dados = await resposta.json();
             setClientes(dados);
         } catch (error) {
@@ -58,21 +56,22 @@ const TelaListarClientes: React.FC = () => {
                 body: JSON.stringify(clienteSelecionado),
             });
             if (!resposta.ok) throw new Error("Erro ao editar cliente.");
-            busca_clientes();
+            const atualizados = clientes.map((c) => c.id === clienteSelecionado.id ? clienteSelecionado : c);
+            setClientes(atualizados);
             setModalVisible(false);
         } catch (error) {
             Alert.alert("Erro", "Falha ao atualizar cliente. " + error);
         }
     };
 
-    const excluirCliente = async () => {
-        if (!clienteSelecionado) return;
+    const excluirCliente = async (id: string) => {
         try {
-            const resposta = await fetch(`https://acmitech.com.br/api/clientes/${clienteSelecionado.id}`, {
+            const resposta = await fetch(`https://acmitech.com.br/api/clientes/${id}`, {
                 method: 'DELETE',
             });
             if (!resposta.ok) throw new Error("Falha ao excluir cliente.");
-            busca_clientes();
+            const atualizados = clientes.filter((c) => c.id !== id);
+            setClientes(atualizados);
             setModalVisible(false);
         } catch (error) {
             Alert.alert("Erro", "Falha ao excluir cliente. " + error);
@@ -130,9 +129,10 @@ const TelaListarClientes: React.FC = () => {
                                 <View style={styles.itemConteudo}>
                                     <View style={styles.itemCabecalho}>
                                         <Text style={styles.nome}>{item.nome_completo}</Text>
+                                        <Text style={styles.valor}>{item.cpf}</Text>
                                     </View>
                                     <Text style={styles.descricao}>{item.email}</Text>
-                                    <Text style={styles.descricao}>{item.endereco}</Text>
+                                    <Text style={styles.descricao}>{item.telefone}</Text>
                                     <View style={styles.itemEditar}>
                                         <Feather name="edit-2" size={16} color="#7a91a7" />
                                     </View>
@@ -143,60 +143,85 @@ const TelaListarClientes: React.FC = () => {
                 )}
             </View>
 
-            <Modal visible={modalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalConteudo}>
-                        <View style={styles.modalCabecalho}>
-                            <Text style={styles.modalTitulo}>Editar Cliente</Text>
-                            <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <Feather name="x" size={24} color="#476c8e" />
-                            </TouchableOpacity>
-                        </View>
+            {clienteSelecionado && (
+                <Modal visible={modalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalConteudo}>
+                            <View style={styles.modalCabecalho}>
+                                <Text style={styles.modalTitulo}>Editar Cliente</Text>
+                                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                    <Feather name="x" size={24} color="#476c8e" />
+                                </TouchableOpacity>
+                            </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Nome Completo</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={clienteSelecionado?.nome_completo}
-                                onChangeText={(text) =>
-                                    setClienteSelecionado({ ...clienteSelecionado!, nome_completo: text })
-                                }
-                            />
-                        </View>
+                            {/* Todos os campos do cliente */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Nome</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={clienteSelecionado?.nome_completo || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, nome_completo: text })
+                                    }
+                                />
+                            </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>E-mail</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={clienteSelecionado?.email}
-                                onChangeText={(text) =>
-                                    setClienteSelecionado({ ...clienteSelecionado!, email: text })
-                                }
-                            />
-                        </View>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>E-mail</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={clienteSelecionado?.email || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, email: text })
+                                    }
+                                />
+                            </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>CPF</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={clienteSelecionado?.cpf}
-                                onChangeText={(text) =>
-                                    setClienteSelecionado({ ...clienteSelecionado!, cpf: text })
-                                }
-                            />
-                        </View>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Senha</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    secureTextEntry
+                                    value={clienteSelecionado?.senha || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, senha: text })
+                                    }
+                                />
+                            </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Telefone</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={clienteSelecionado?.telefone}
-                                onChangeText={(text) =>
-                                    setClienteSelecionado({ ...clienteSelecionado!, telefone: text })
-                                }
-                            />
-                        </View>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>CPF</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={clienteSelecionado?.cpf || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, cpf: text })
+                                    }
+                                />
+                            </View>
 
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Telefone</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={clienteSelecionado?.telefone || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, telefone: text })
+                                    }
+                                />
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Endereço completo</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={clienteSelecionado?.endereco || ''}
+                                    onChangeText={(text) =>
+                                        setClienteSelecionado({ ...clienteSelecionado, endereco: text })
+                                    }
+                                />
+                            </View>
+                        </View>
                         <View style={styles.modalBotoes}>
                             <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
                                 <LinearGradient colors={['#90d4aa', '#6db58a']} style={styles.botaoGradiente}>
@@ -205,7 +230,7 @@ const TelaListarClientes: React.FC = () => {
                                 </LinearGradient>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.botaoExcluir} onPress={excluirCliente}>
+                            <TouchableOpacity style={styles.botaoExcluir} onPress={() => excluirCliente(clienteSelecionado.id)}>
                                 <LinearGradient colors={['#ff7b7b', '#e85656']} style={styles.botaoGradiente}>
                                     <Feather name="trash-2" size={18} color="#ffffff" />
                                     <Text style={styles.botaoTexto}>Excluir</Text>
@@ -213,242 +238,74 @@ const TelaListarClientes: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
-            </Modal>
-        </SafeAreaView>
+                </Modal>
+            )
+            }
+
+        </SafeAreaView >
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        position: 'relative',
-    },
-    background: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-    },
-    header: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-    },
+    container: { flex: 1, position: 'relative' },
+    background: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+    header: { paddingTop: 20, paddingHorizontal: 20, paddingBottom: 30 },
     voltarBotao: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-        marginBottom: 20,
+        width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff',
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1, shadowRadius: 4, elevation: 2, marginBottom: 20,
     },
-    cabecalhoTitulo: {
-        alignItems: 'center',
-    },
+    cabecalhoTitulo: { alignItems: 'center' },
     iconeContainer: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-        marginBottom: 16,
+        width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff',
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3, marginBottom: 16,
     },
-    titulo: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#476c8e',
-        marginBottom: 8,
-    },
-    subTitulo: {
-        fontSize: 16,
-        color: '#7a91a7',
-        textAlign: 'center',
-    },
-    conteudo: {
-        flex: 1,
-        paddingHorizontal: 20,
-    },
+    titulo: { fontSize: 28, fontWeight: 'bold', color: '#476c8e', marginBottom: 8 },
+    subTitulo: { fontSize: 16, color: '#7a91a7', textAlign: 'center' },
+    conteudo: { flex: 1, paddingHorizontal: 20 },
     botaoCadastro: {
-        height: 50,
-        borderRadius: 25,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-        overflow: 'hidden',
+        height: 50, borderRadius: 25, marginBottom: 20,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1, shadowRadius: 4, elevation: 2, overflow: 'hidden',
     },
-    botaoCadastroProduto: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-    },
-    botaoCadastroTexto: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    listaVazia: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 60,
-    },
-    listaVaziaTitulo: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#476c8e',
-        marginTop: 20,
-        marginBottom: 8,
-    },
-    listaVaziaSubTitulo: {
-        fontSize: 14,
-        color: '#7a91a7',
-    },
-    listaConteudo: {
-        paddingBottom: 20,
-    },
+    botaoCadastroProduto: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+    botaoCadastroTexto: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 8 },
+    listaVazia: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
+    listaVaziaTitulo: { fontSize: 18, fontWeight: '600', color: '#476c8e', marginTop: 20, marginBottom: 8 },
+    listaVaziaSubTitulo: { fontSize: 14, color: '#7a91a7' },
+    listaConteudo: { paddingBottom: 20 },
     itemContainer: {
-        backgroundColor: '#ffffff',
-        borderRadius: 12,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-        overflow: 'hidden',
+        backgroundColor: '#fff', borderRadius: 12, marginBottom: 12,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, overflow: 'hidden',
     },
-    itemConteudo: {
-        padding: 16,
-        position: 'relative',
-    },
-    itemCabecalho: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 8,
-    },
-    nome: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#476c8e',
-        flex: 1,
-        marginRight: 10,
-    },
-    valor: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#6db58a',
-    },
-    descricao: {
-        fontSize: 14,
-        color: '#7a91a7',
-        lineHeight: 20,
-        marginBottom: 10,
-    },
-    itemEditar: {
-        position: 'absolute',
-        bottom: 12,
-        right: 16,
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 20,
-    },
-    modalConteudo: {
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 20,
-        maxHeight: '80%',
-    },
+    itemConteudo: { padding: 16, position: 'relative' },
+    itemCabecalho: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
+    nome: { fontSize: 16, fontWeight: 'bold', color: '#476c8e', flex: 1, marginRight: 10 },
+    valor: { fontSize: 14, fontWeight: '600', color: '#6db58a' },
+    descricao: { fontSize: 14, color: '#7a91a7', lineHeight: 20, marginBottom: 10 },
+    itemEditar: { position: 'absolute', bottom: 12, right: 16 },
+    modalContainer: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 20 },
+    modalConteudo: { backgroundColor: '#fff', borderRadius: 16, padding: 20, maxHeight: '80%' },
     modalCabecalho: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-        paddingBottom: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 20, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
     },
-    modalTitulo: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#476c8e',
-    },
-    inputContainer: {
-        marginBottom: 16,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#476c8e',
-        marginBottom: 8,
-    },
+    modalTitulo: { fontSize: 20, fontWeight: 'bold', color: '#476c8e' },
+    inputContainer: { marginBottom: 16 },
+    label: { fontSize: 14, fontWeight: '600', color: '#476c8e', marginBottom: 8 },
     input: {
-        height: 45,
-        borderColor: '#e0e0e0',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        fontSize: 16,
-        backgroundColor: '#f9f9f9',
+        height: 45, borderColor: '#e0e0e0', borderWidth: 1, borderRadius: 8,
+        paddingHorizontal: 12, fontSize: 16, backgroundColor: '#f9f9f9',
     },
-    textArea: {
-        height: 80,
-        textAlignVertical: 'top',
-        paddingTop: 12,
-    },
-    modalBotoes: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-        gap: 12,
-    },
-    saveButton: {
-        flex: 1,
-        height: 45,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    botaoExcluir: {
-        flex: 1,
-        height: 45,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    botaoGradiente: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    botaoTexto: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 6,
-    },
+    modalBotoes: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap: 12 },
+    saveButton: { flex: 1, height: 45, borderRadius: 8, overflow: 'hidden' },
+    botaoExcluir: { flex: 1, height: 45, borderRadius: 8, overflow: 'hidden' },
+    botaoGradiente: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+    botaoTexto: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 6 },
 });
 
 export default TelaListarClientes;

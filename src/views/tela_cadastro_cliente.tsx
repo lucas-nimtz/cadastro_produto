@@ -1,22 +1,25 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 import { useNavigation } from "@react-navigation/native";
 
-type prop_navegacao = StackNavigationProp<RootStackParamList, "Cadastro">
+type prop_navegacao = StackNavigationProp<RootStackParamList, "CadastroClientes">;
 
 interface Cliente {
-    nome_completo: string;
+    nome: string;
     email: string;
     senha: string;
     cpf: string;
-    endereco: string;
-    telefone: string;
+    rg: string;
+    tel: string;
+    rua: string;
+    bairro: string;
+    estado: string;
+    cep: string;
 }
 
 const TelaCadastroCliente: React.FC = () => {
@@ -29,55 +32,40 @@ const TelaCadastroCliente: React.FC = () => {
     } = useForm<Cliente>();
 
     const enviar = async (dados: Cliente) => {
-        try{
+        try {
             const corpo = {
-                nome_completo: dados.nome_completo,
-                email: dados.email,
-                senha: dados.senha,
-                cpf: dados.cpf,
-                endereco: dados.endereco,
-                telefone: dados.telefone,
-                data_cadastro: new Date().toISOString().split("T")[0]
-            }
+                ...dados,
+                data_cadastro: new Date().toISOString().split("T")[0],
+            };
 
-            const resposta = await fetch("https://acmitech.com.br/api/clientes",
-                {
-                    method: "POST",
-                    headers:{
-                        "Content-Type":"application/json",
-                    },
-                    body: JSON.stringify(corpo)
-                }
-            )
+            const resposta = await fetch("http://191.252.103.125/api/clientes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(corpo),
+            });
 
             if (!resposta.ok) {
-                throw new Error("Erro na resposta da API")
+                throw new Error("Erro na resposta da API");
             }
 
             Alert.alert(
                 "Sucesso!",
-                "Cliente cadastrado com sucesso.",
+                "Cliente cadastrado com sucesso!",
                 [
                     {
                         text: "OK",
                         onPress: () => {
                             reset();
-                            navegacao.navigate("ListagemClientes");
+                            navegacao.navigate("ListagemClientes"); // ajuste conforme sua rota de listagem
                         }
                     }
                 ]
             );
-
         } catch (error) {
-            Alert.alert(
-                "Erro",
-                "Falha ao cadastrar cliente." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
-            );
+            console.log("Erro ao enviar dados: ", error);
+            Alert.alert("Erro", "Não foi possível cadastrar o cliente.");
         }
     };
 
@@ -100,176 +88,55 @@ const TelaCadastroCliente: React.FC = () => {
 
                     <View style={styles.cabecalhoTitulo}>
                         <View style={styles.iconeContainer}>
-                            <Feather name="plus-circle" size={32} color="#5b9bd5" />
+                            <Feather name="user-plus" size={32} color="#5b9bd5" />
                         </View>
                         <Text style={styles.titulo}>Cadastrar Cliente</Text>
-                        <Text style={styles.subTitulo}>Adicione um novo cliente ao catálogo</Text>
+                        <Text style={styles.subTitulo}>Adicione um novo cliente ao sistema</Text>
                     </View>
                 </View>
 
                 <View style={styles.formularioContainer}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="user" size={16} color="#5b9bd5" /> Nome completo do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="nome_completo"
-                            rules={{ required: "Nome deve ser obrigatório" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.nome_completo && styles.inputError]}
-                                        placeholder="Digite o nome completo"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
-                            )}
-                        />
-                        {errors.nome_completo && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.nome_completo.message}
+                    {[
+                        { nome: "nome", label: "Nome", placeholder: "Digite o nome", icon: "user" },
+                        { nome: "email", label: "Email", placeholder: "Digite o email", icon: "mail" },
+                        { nome: "senha", label: "Senha", placeholder: "Digite a senha", icon: "lock", secure: true },
+                        { nome: "cpf", label: "CPF", placeholder: "Digite o CPF", icon: "credit-card" },
+                        { nome: "rg", label: "RG", placeholder: "Digite o RG", icon: "id-card" },
+                        { nome: "tel", label: "Telefone", placeholder: "Digite o telefone", icon: "phone" },
+                        { nome: "rua", label: "Rua", placeholder: "Digite a rua", icon: "map-pin" },
+                        { nome: "bairro", label: "Bairro", placeholder: "Digite o bairro", icon: "home" },
+                        { nome: "estado", label: "Estado", placeholder: "Digite o estado", icon: "flag" },
+                        { nome: "cep", label: "CEP", placeholder: "Digite o CEP", icon: "map" },
+                    ].map((campo) => (
+                        <View style={styles.inputGroup} key={campo.nome}>
+                            <Text style={styles.label}>
+                                <Feather name={campo.icon as any} size={16} color="#5b9bd5" /> {campo.label}
                             </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="mail" size={16} color="#5b9bd5" /> E-mail do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="email"
-                            rules={{ required: "E-mail deve ser obrigatório" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.email && styles.inputError]}
-                                        placeholder="Digite o E-mail do cliente"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
+                            <Controller
+                                control={control}
+                                name={campo.nome as keyof Cliente}
+                                rules={{ required: `${campo.label} é obrigatório` }}
+                                render={({ field: { onChange, value } }) => (
+                                    <View style={styles.inputContainer}>
+                                        <TextInput
+                                            style={[styles.input, errors[campo.nome as keyof Cliente] && styles.inputError]}
+                                            placeholder={campo.placeholder}
+                                            placeholderTextColor="#a0a0a0"
+                                            secureTextEntry={campo.secure || false}
+                                            onChangeText={onChange}
+                                            value={value}
+                                        />
+                                    </View>
+                                )}
+                            />
+                            {errors[campo.nome as keyof Cliente] && (
+                                <Text style={styles.erroTexto}>
+                                    <Feather name="alert-circle" size={12} color="#e74c3c" />
+                                    {errors[campo.nome as keyof Cliente]?.message?.toString()}
+                                </Text>
                             )}
-                        />
-                        {errors.email && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.email.message}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="lock" size={16} color="#5b9bd5" /> Senha do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="senha"
-                            rules={{ required: "Senha deve ser obrigatória" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.senha && styles.inputError]}
-                                        placeholder="Digite a senha do cliente"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
-                            )}
-                        />
-                        {errors.senha && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.senha.message}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="command" size={16} color="#5b9bd5" /> CPF do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="cpf"
-                            rules={{ required: "CPF deve ser obrigatório" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.cpf && styles.inputError]}
-                                        placeholder="Digite o CPF do cliente"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
-                            )}
-                        />
-                        {errors.cpf && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.cpf.message}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="home" size={16} color="#5b9bd5" /> Endereço do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="endereco"
-                            rules={{ required: "Endereço deve ser obrigatório" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.endereco && styles.inputError]}
-                                        placeholder="Digite o endereço do cliente"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
-                            )}
-                        />
-                        {errors.endereco && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.endereco.message}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Feather name="smartphone" size={16} color="#5b9bd5" /> Telefone do cliente
-                        </Text>
-                        <Controller
-                            control={control}
-                            name="telefone"
-                            rules={{ required: "Telefone deve ser obrigatório" }}
-                            render={({ field: { onChange, value } }) => (
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={[styles.input, errors.telefone && styles.inputError]}
-                                        placeholder="Digite o número de telefone do cliente"
-                                        placeholderTextColor="#a0a0a0"
-                                        onChangeText={onChange}
-                                        value={value}
-                                    />
-                                </View>
-                            )}
-                        />
-                        {errors.telefone && (
-                            <Text style={styles.erroTexto}>
-                                <Feather name="alert-circle" size={12} color="#e74c3c" /> {errors.telefone.message}
-                            </Text>
-                        )}
-                    </View>
-                    
+                        </View>
+                    ))}
                 </View>
 
                 <View style={styles.botoesContainer}>
@@ -303,166 +170,55 @@ const TelaCadastroCliente: React.FC = () => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        position: 'relative',
-    },
-    background: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        paddingBottom: 20,
-    },
-    cabecalho: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-    },
+    container: { flex: 1, position: "relative" },
+    background: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
+    scrollContainer: { flexGrow: 1, paddingBottom: 20 },
+    cabecalho: { paddingTop: 20, paddingHorizontal: 20, paddingBottom: 30 },
     voltarBotao: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-        marginBottom: 20,
+        width: 40, height: 40, borderRadius: 20, backgroundColor: "#fff",
+        alignItems: "center", justifyContent: "center",
+        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1, shadowRadius: 4, elevation: 2, marginBottom: 20
     },
-    cabecalhoTitulo: {
-        alignItems: 'center',
-    },
+    cabecalhoTitulo: { alignItems: "center" },
     iconeContainer: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-        marginBottom: 16,
+        width: 64, height: 64, borderRadius: 32, backgroundColor: "#fff",
+        alignItems: "center", justifyContent: "center",
+        shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3, marginBottom: 16
     },
-    titulo: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#476c8e',
-        marginBottom: 8,
-    },
-    subTitulo: {
-        fontSize: 16,
-        color: '#7a91a7',
-        textAlign: 'center',
-    },
-    formularioContainer: {
-        paddingHorizontal: 20,
-        marginBottom: 30,
-    },
-    inputGroup: {
-        marginBottom: 20,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#476c8e',
-        marginBottom: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    inputContainer: {
-        position: 'relative',
-    },
+    titulo: { fontSize: 28, fontWeight: "bold", color: "#476c8e", marginBottom: 8 },
+    subTitulo: { fontSize: 16, color: "#7a91a7", textAlign: "center" },
+    formularioContainer: { paddingHorizontal: 20, marginBottom: 30 },
+    inputGroup: { marginBottom: 20 },
+    label: { fontSize: 16, fontWeight: "600", color: "#476c8e", marginBottom: 8, flexDirection: "row", alignItems: "center" },
+    inputContainer: { position: "relative" },
     input: {
-        height: 50,
-        backgroundColor: '#ffffff',
-        borderColor: '#e1e8ed',
-        borderWidth: 1,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        fontSize: 16,
-        color: '#333',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 1,
+        height: 50, backgroundColor: "#fff",
+        borderColor: "#e1e8ed", borderWidth: 1, borderRadius: 12,
+        paddingHorizontal: 16, fontSize: 16, color: "#333",
+        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05, shadowRadius: 4, elevation: 1
     },
-    textArea: {
-        height: 100,
-        paddingTop: 12,
-    },
-    inputError: {
-        borderColor: '#e74c3c',
-        borderWidth: 1.5,
-    },
-    erroTexto: {
-        color: '#e74c3c',
-        fontSize: 12,
-        marginTop: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    botoesContainer: {
-        paddingHorizontal: 20,
-        gap: 12,
-    },
+    inputError: { borderColor: "#e74c3c", borderWidth: 1.5 },
+    erroTexto: { color: "#e74c3c", fontSize: 12, marginTop: 4, flexDirection: "row", alignItems: "center" },
+    botoesContainer: { paddingHorizontal: 20, gap: 12 },
     botaoSalvar: {
-        height: 56,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-        overflow: 'hidden',
+        height: 56, borderRadius: 12,
+        shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3, overflow: "hidden"
     },
-    botaoCancelar: {
-        height: 56,
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    botaoGradiente: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-    },
+    botaoCancelar: { height: 56, borderRadius: 12, overflow: "hidden" },
+    botaoGradiente: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 20 },
     botaoSecundario: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#ffffff',
-        borderWidth: 1,
-        borderColor: '#e1e8ed',
+        flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+        backgroundColor: "#fff", borderWidth: 1, borderColor: "#e1e8ed"
     },
-    botaoTexto: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    botaoTextoSecundario: {
-        color: '#7a91a7',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
+    botaoTexto: { color: "#fff", fontSize: 16, fontWeight: "600", marginLeft: 8 },
+    botaoTextoSecundario: { color: "#7a91a7", fontSize: 16, fontWeight: "600", marginLeft: 8 },
 });
 
 export default TelaCadastroCliente;

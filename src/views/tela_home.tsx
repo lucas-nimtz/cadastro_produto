@@ -28,7 +28,6 @@ const Tela_Home: React.FC = () => {
             </View>
 
             <View style={styles.botaoCOntainer}>
-                
                 <TouchableOpacity
                     style={[styles.botao, styles.listagemBotao]}
                     onPress={() => { navegacao.navigate('Listagem'); }}
@@ -44,7 +43,6 @@ const Tela_Home: React.FC = () => {
                         <Text style={styles.botaoTexto}>Ver Catálogo</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-                
                 <TouchableOpacity
                     style={[styles.botao, styles.cadastroBotao]}
                     onPress={() => { navegacao.navigate('Cadastro'); }}
@@ -58,6 +56,21 @@ const Tela_Home: React.FC = () => {
                     >
                         <Feather name="plus-circle" size={24} color="#ffffff" />
                         <Text style={styles.botaoTexto}>Cadastrar Produto</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.botao, styles.listagemBotao]}
+                    onPress={() => { navegacao.navigate('ListagemClientes'); }}
+                    activeOpacity={0.8}
+                >
+                    <LinearGradient
+                        colors={['#a7c9e8', '#7ba7d0']}
+                        style={styles.botaoGradiente}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        <Feather name="list" size={24} color="#ffffff" />
+                        <Text style={styles.botaoTexto}>Lista de CLientes</Text>
                     </LinearGradient>
                 </TouchableOpacity>
 
@@ -74,22 +87,6 @@ const Tela_Home: React.FC = () => {
                     >
                         <Feather name="user-plus" size={24} color="#ffffff" />
                         <Text style={styles.botaoTexto}>Cadastrar Cliente</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.botao, styles.listagemBotao]}
-                    onPress={() => { navegacao.navigate('ListagemClientes'); }}
-                    activeOpacity={0.8}
-                >
-                    <LinearGradient
-                        colors={['#bba7e8ff', '#7c7bd0ff']}
-                        style={styles.botaoGradiente}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <Feather name="users" size={24} color="#ffffff" />
-                        <Text style={styles.botaoTexto}>Ver Clientes</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>

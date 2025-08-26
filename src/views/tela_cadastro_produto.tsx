@@ -61,32 +61,30 @@ const Tela_cadastro_produto: React.FC = () => {
     // }
 
     const enviar = async (dados: Produto) => {
-        try{
+        try {
             const corpo = {
                 nome: dados.nome,
                 descricao: dados.descricao,
-                valor: parseFloat(dados.valor), // texto para decimal
-                quantidade: parseInt(dados.quantidade), // texto para inteiro
-                data_cadastro: new Date().toISOString().split("T")[0] // gera data em YYYY/MM/DD
-            }
+                valor: parseFloat(dados.valor),
+                quantidade: parseInt(dados.quantidade),
+                data_cadastro: new Date().toISOString().split("T")[0], // formato YYYY-MM-DD
+            };
 
-            const resposta = await fetch("https://acmitech.com.br/api/produtos",
-                {
-                    method: "POST",
-                    headers:{
-                        "Content-Type":"application/json",
-                    },
-                    body: JSON.stringify(corpo)
-                }
-            )
+            const resposta = await fetch("http://191.252.103.125/api/produtos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(corpo),
+            });
 
             if (!resposta.ok) {
-                throw new Error("Erro na resposta da API")
+                throw new Error("Erro na resposta da API");
             }
 
             Alert.alert(
                 "Sucesso!",
-                "Produto cadastrado com sucesso.",
+                "Produto cadastrado com sucesso!",
                 [
                     {
                         text: "OK",
@@ -97,19 +95,12 @@ const Tela_cadastro_produto: React.FC = () => {
                     }
                 ]
             );
-
         } catch (error) {
-            Alert.alert(
-                "Erro",
-                "Falha ao cadastrar produto." + error,
-                [
-                    {
-                        text: "OK"
-                    }
-                ]
-            );
+            console.log("Erro ao enviar dados: ", error);
+            Alert.alert("Erro", "Não foi possível cadastrar o produto.");
         }
     };
+
 
     const voltar = () => {
         navegacao.goBack();
@@ -222,7 +213,6 @@ const Tela_cadastro_produto: React.FC = () => {
                             </Text>
                         )}
                     </View>
-
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>
                             <Feather name="hash" size={16} color="#5b9bd5" /> Quantidade
@@ -230,12 +220,12 @@ const Tela_cadastro_produto: React.FC = () => {
                         <Controller
                             control={control}
                             name="quantidade"
-                            rules={{ required: "Quantidade deve ser obrigatória" }}
+                            rules={{ required: "Quantidade é obrigatória" }}
                             render={({ field: { onChange, value } }) => (
                                 <View style={styles.inputContainer}>
                                     <TextInput
                                         style={[styles.input, errors.quantidade && styles.inputError]}
-                                        placeholder="0"
+                                        placeholder="Ex: 10"
                                         placeholderTextColor="#a0a0a0"
                                         keyboardType="numeric"
                                         onChangeText={onChange}
@@ -250,6 +240,7 @@ const Tela_cadastro_produto: React.FC = () => {
                             </Text>
                         )}
                     </View>
+
                 </View>
 
                 <View style={styles.botoesContainer}>
